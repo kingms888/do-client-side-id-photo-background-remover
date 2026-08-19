@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <meta name="description" content="Free client-side ID photo background remover. 100% private, no upload – your photo never leaves your device. Browser-based tool for passport, visa, and ID pictures.">
+  <meta name="keywords" content="ID photo background remover, client-side image processing, privacy tool, no upload, browser-based, passport photo background, visa photo background">
+  <meta name="author" content="PrivPic Tools">
+  <title>ID Photo Background Remover – Private, No-Upload Browser Tool</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+    body {
+      background: linear-gradient(145deg, #f8faff 0%, #eef2f9 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem 1rem 2rem;
+    }
+    .main-container {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(8px);
+      border-radius: 2.5rem;
+      padding: 2rem 1.5rem 2.5rem;
+      box-shadow: 0 20px 40px -12px rgba(0,20,50,0.2);
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #0b1b33;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: #1f4a5c;
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.3rem 0.8rem;
+      border-radius: 40px;
+      letter-spacing: 0.3px;
+      background: #0f3b4e;
+      border: 1px solid #2d6a80;
+    }
+    .subhead {
+      color: #2c3e5c;
+      font-size: 1.1rem;
+      margin-top: 0.5rem;
+      border-left: 4px solid #2f7a8c;
+      padding-left: 1rem;
+      background: rgba(47,122,140,0.05);
+      border-radius: 0 8px 8px 0;
+    }
+    .tool-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .upload-area {
+      background: white;
+      border-radius: 2rem;
+      padding: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
+      border: 1px solid #e0e7f0;
+    }
+    .file-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f2f6fd;
+      border: 2px dashed #9bb8d4;
+      border-radius: 1.5rem;
+      padding: 2.5rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .file-label:hover {
+      background: #e9f0fa;
+      border-color: #2f7a8c;
+    }
+    .file-label span {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #1b3a5c;
+      margin-top: 0.8rem;
+    }
+    .file-label svg {
+      width: 3.5rem;
+      height: 3.5rem;
+      color: #2f7a8c;
+    }
+    #imageInput {
+      display: none;
+    }
+    .preview-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-top: 1.8rem;
+    }
+    .image-card {
+      background: white;
+      border-radius: 1.2rem;
+      padding: 1rem;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.03);
+      flex: 1 1 220px;
+      min-width: 180px;
+      border: 1px solid #e6ecf5;
+    }
+    .image-card h3 {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #4a5f7a;
+      margin-bottom: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .image-card canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 0.8rem;
+      background: #f0f3f8;
+      display: block;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02);
+    }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 1.5rem;
+      justify-content: center;
+    }
+    .btn {
+      background: white;
+      border: 1px solid #b8c9dd;
+      padding: 0.7rem 1.2rem;
+      border-radius: 60px;
+      font-weight: 500;
+      color: #1e3a5f;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .btn-primary {
+      background: #1f4a5c;
+      border-color: #1f4a5c;
+      color: white;
+      box-shadow: 0 6px 14px rgba(31,74,92,0.2);
+    }
+    .btn-primary:hover {
+      background: #173c4b;
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .privacy-note {
+      margin-top: 2rem;
+      background: #eef4fa;
+      border-radius: 1.5rem;
+      padding: 1rem 1.5rem;
+      font-size: 0.85rem;
+      color: #2c3e5c;
+      border: 1px solid #d3e2f0;
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+    }
+    .privacy-note svg {
+      flex-shrink: 0;
+      width: 1.4rem;
+      height: 1.4rem;
+      color: #1f4a5c;
+    }
+    .ad-placeholder {
+      background: #f9fbfe;
+      border-radius: 1.2rem;
+      padding: 1rem 1.5rem;
+      margin-top: 2rem;
+      text-align: center;
+      border: 1px dashed #b8c9dd;
+      color: #4a5f7a;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .ad-placeholder span {
+      background: #e2eaf3;
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      font-weight: 500;
+    }
+    .resource-section {
+      margin-top: 2rem;
+      background: white;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid #e0e7f0;
+    }
+    .resource-section h2 {
+      font-size: 1.2rem;
+      color: #0b1b33;
+      margin-bottom: 0.8rem;
+    }
+    .resource-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      list-style: none;
+    }
+    .resource-links li a {
+      color: #1f4a5c;
+      font-weight: 500;
+      text-decoration: none;
+      border-bottom: 1px solid #9bb8d4;
+      padding-bottom: 2px;
+    }
+    .resource-links li a:hover {
+      color: #0b2e3f;
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #4a5f7a;
+      text-align: center;
+    }
+    @media (max-width: 600px) {
+      .main-container { padding: 1.5rem 1rem; }
+      h1 { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- SEO semantic header -->
+    <header>
+      <h1>🪪 ID Photo Background Remover <span class="badge">100% private · no upload</span></h1>
+      <div class="subhead">Client-side processing – your photo never leaves your device.</div>
+    </header>
+
+    <!-- Main tool -->
+    <section class="tool-grid" aria-label="ID photo background remover tool">
+      <div class="upload-area">
+        <label for="imageInput" class="file-label" id="dropZone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="9" cy="9" r="2"></circle>
+            <path d="M21 15l-5-5L5 21"></path>
+          </svg>
+          <span>Click to upload ID photo (JPG/PNG)</span>
+          <span style="font-size:0.8rem; color:#4a5f7a;">or drag & drop (demo works with any image)</span>
+        </label>
+        <input type="file" id="imageInput" accept="image/png,image/jpeg" />
+        
+        <!-- preview area -->
+        <div class="preview-row" id="previewRow" style="display: none;">
+          <div class="image-card">
+            <h3>🖼️ Original</h3>
+            <canvas id="originalCanvas" width="300" height="300"></canvas>
+          </div>
+          <div class="image-card">
+            <h3>✨ Background removed</h3>
+            <canvas id="resultCanvas" width="300" height="300"></canvas>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn" id="removeBgBtn" disabled>✨ Remove background</button>
+          <button class="btn" id="downloadBtn" disabled>⬇️ Download PNG</button>
+          <button class="btn" id="resetBtn">↺ Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visible ad placeholder (clearly marked) -->
+    <div class="ad-placeholder" aria-label="advertisement placeholder">
+      <span>📢 AD</span> 
+      <span style="opacity:0.7;">Sponsored: privacy-friendly ID photo service (affiliate)</span>
+    </div>
+
+    <!-- Affiliate / resource placeholder -->
+    <section class="resource-section" aria-label="resources and recommendations">
+      <h2>📌 Recommended resources for official ID photos</h2>
+      <ul class="resource-links">
+        <li><a href="#">Passport photo guidelines (official)</a></li>
+        <li><a href="#">Visa photo size checker</a></li>
+        <li><a href="#">ID photo printing services</a></li>
+      </ul>
+      <p style="margin-top:0.8rem; font-size:0.85rem; color:#4a5f7a;">* Affiliate links may earn a commission at no extra cost to you.</p>
+    </section>
+
+    <!-- Privacy note with event reporting -->
+    <div class="privacy-note" id="privacyNote">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <span><strong>Privacy note:</strong> Events may be counted anonymously for product improvement. No image data is ever transmitted. <span style="opacity:0.7;">(reportEvent only if endpoint configured)</span></span>
+    </div>
+
+    <footer>
+      <p>🔒 client-side · no upload · your photo stays on your device</p>
+    </footer>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- reportEvent (anonymous metrics) ----------
+      function reportEvent(name, payload = {}) {
+        try {
+          if (window.ORGANISM_METRICS_ENDPOINT && typeof window.ORGANISM_METRICS_ENDPOINT === 'string') {
+            fetch(window.ORGANISM_METRICS_ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ event: name, ...payload, ts: Date.now() }),
+              keepalive: true
+            }).catch(() => {});
+          }
+        } catch (e) { /* silent */ }
+      }
+
+      // ---------- DOM elements ----------
+      const fileInput = document.getElementById('imageInput');
+      const dropZone = document.getElementById('dropZone');
+      const originalCanvas = document.getElementById('originalCanvas');
+      const resultCanvas = document.getElementById('resultCanvas');
+      const previewRow = document.getElementById('previewRow');
+      const removeBtn = document.getElementById('removeBgBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      let originalImage = null; // Image object
+      let processedImageData = null; // ImageData for result
+
+      // ---------- helper: draw image to canvas ----------
+      function drawImageToCanvas(img, canvas) {
+        const ctx = canvas.getContext('2d');
+        // maintain aspect ratio, fit within canvas size
+        const maxW = 300, maxH = 300;
+        let w = img.naturalWidth || 300;
+        let h = img.naturalHeight || 300;
+        const ratio = Math.min(maxW / w, maxH / h, 1);
+        w = Math.floor(w * ratio);
+        h = Math.floor(h * ratio);
+        canvas.width = w;
+        canvas.height = h;
+        ctx.clearRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+      }
+
+      // ---------- background removal (chroma-key like + flood fill) ----------
+      function removeBackgroundFromCanvas(sourceCanvas) {
+        const ctx = sourceCanvas.getContext('2d');
+        const w = sourceCanvas.width;
+        const h = sourceCanvas.height;
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const data = imageData.data;
+
+        // 1. detect background color from corners (average)
+        const cornerPoints = [
+          0, 0, (w-1)*4, 0, 0, (h-1)*4, (w-1)*4, (h-1)*4
+        ];
+        let rSum = 0, gSum = 0, bSum = 0, count = 0;
+        for (let i = 0; i < cornerPoints.length; i+=2) {
+          const x = cornerPoints[i];
+          const y = cornerPoints[i+1];
+          const idx = (y * w + x) * 4;
+          rSum += data[idx];
+          gSum += data[idx+1];
+          bSum += data[idx+2];
+          count++;
+        }
+        const bgR = rSum / count;
+        const bgG = gSum / count;
+        const bgB = bSum / count;
+
+        // 2. flood fill from edges (tolerance threshold)
+        const tolerance = 60; // adjustable
+        const visited = new Uint8Array(w * h);
+        const queue = [];
+        // add border pixels
+        for (let x = 0; x < w; x++) {
+          enqueue(x, 0);
+          enqueue(x, h-1);
+        }
+        for (let y = 0; y < h; y++) {
+          enqueue(0, y);
+          enqueue(w-1, y);
+        }
+
+        function enqueue(x, y) {
+          if (x < 0 || x >= w || y < 0 || y >= h) return;
+          const idx = y * w + x;
+          if (visited[idx]) return;
+          const pixelIdx = idx * 4;
+          const r = data[pixelIdx];
+          const g = data[pixelIdx+1];
+          const b = data[pixelIdx+2];
+          if (Math.abs(r - bgR) < tolerance && Math.abs(g - bgG) < tolerance && Math.abs(b - bgB) < tolerance) {
+            visited[idx] = 1;
+            queue.push(idx);
+          }
+        }
+
+        while (queue.length) {
+          const idx = queue.pop();
+          const x = idx % w;
+          const y = Math.floor(idx / w);
+          // neighbors
+          if (x > 0) enqueue(x-1, y);
+          if (x < w-1) enqueue(x+1, y);
+          if (y > 0) enqueue(x, y-1);
+          if (y < h-1) enqueue(x, y+1);
+        }
+
+        // 3. set alpha to 0 for background pixels
+        for (let i = 0; i < w * h; i++) {
+          if (visited[i]) {
+            data[i*4 + 3] = 0; // transparent
+          }
+        }
+
+        // 4. (optional) smooth edges: simple blur on alpha for better quality
+        // we'll do a light 3x3 average on alpha for edge pixels (skip for simplicity but works)
+        // but keep as is for performance
+
+        ctx.putImageData(imageData, 0, 0);
+        return imageData;
+      }
+
+      // ---------- load image ----------
+      function loadImage(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            originalImage = img;
+            drawImageToCanvas(img, originalCanvas);
+            // reset result canvas
+            const ctx = resultCanvas.getContext('2d');
+            ctx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
+            resultCanvas.width = originalCanvas.width;
+            resultCanvas.height = originalCanvas.height;
+            ctx.drawImage(originalCanvas, 0, 0);
+            // enable buttons
+            previewRow.style.display = 'flex';
+            removeBtn.disabled = false;
+            downloadBtn.disabled = true;
+            processedImageData = null;
+            reportEvent('image_loaded', { size: file.size || 0 });
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // ---------- remove background ----------
+      function processBackground() {
+        if (!originalImage) return;
+        // copy original canvas to result canvas
+        resultCanvas.width = originalCanvas.width;
+        resultCanvas.height = originalCanvas.height;
+        const ctx = resultCanvas.getContext('2d');
+        ctx.drawImage(originalCanvas, 0, 0);
+        // perform removal
+        const imageData = removeBackgroundFromCanvas(resultCanvas);
+        processedImageData = imageData;
+        downloadBtn.disabled = false;
+        reportEvent('background_removed', { width: resultCanvas.width, height: resultCanvas.height });
+      }
+
+      // ---------- download ----------
+      function downloadResult() {
+        if (!processedImageData) return;
+        const link = document.createElement('a');
+        link.download = 'id-photo-transparent.png';
+        link.href = resultCanvas.toDataURL('image/png');
+        link.click();
+        reportEvent('download_clicked', { format: 'png' });
+      }
+
+      // ---------- reset ----------
+      function resetTool() {
+        fileInput.value = '';
+        originalImage = null;
+        processedImageData = null;
+        previewRow.style.display = 'none';
+        removeBtn.disabled = true;
+        downloadBtn.disabled = true;
+        // clear canvases
+        const ctx1 = originalCanvas.getContext('2d');
+        const ctx2 = resultCanvas.getContext('2d');
+        ctx1.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
+        ctx2.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
+        originalCanvas.width = 300; originalCanvas.height = 300;
+        resultCanvas.width = 300; resultCanvas.height = 300;
+        reportEvent('reset_clicked');
+      }
+
+      // ---------- event listeners ----------
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) loadImage(file);
+      });
+
+      // drag & drop
+      ['dragenter', 'dragover'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          dropZone.style.borderColor = '#2f7a8c';
+        });
+      });
+      ['dragleave', 'drop'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          dropZone.style.borderColor = '#9bb8d4';
+        });
+      });
+      dropZone.addEventListener('drop', (e) => {
+        const file = e.dataTransfer.files[0];
+        if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+          loadImage(file);
+          // sync input
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          fileInput.files = dt.files;
+        } else {
+          alert('Please drop a JPG or PNG image.');
+        }
+      });
+
+      removeBtn.addEventListener('click', processBackground);
+      downloadBtn.addEventListener('click', downloadResult);
+      resetBtn.addEventListener('click', resetTool);
+
+      // initial report
+      reportEvent('tool_loaded', { page: 'id_photo_bg_remover' });
+
+      // expose reportEvent globally (optional)
+      window.reportEvent = reportEvent;
+    })();
+  </script>
+
+<section data-organism-discovery="hub" style="margin:32px auto 20px;max-width:1040px;padding:16px;border-top:1px solid #d9e2ec;color:#475569;font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <strong style="display:block;color:#0f172a;margin-bottom:6px">More free browser tools</strong>
+  <p style="margin:0 0 8px">This page is part of an autonomous micro-tool network. Explore the live tool directory and related utilities.</p>
+  <p style="margin:0"><a href="https://kingms888.github.io/do-digital-organism-index/" style="color:#0f766e;font-weight:700">Open the tool directory</a> </p>
+</section>
+</body>
+</html>
